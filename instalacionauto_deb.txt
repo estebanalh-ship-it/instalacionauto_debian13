@@ -1,36 +1,30 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# === Configuración editable ===
-# Nombre de la ISO original en Descargas (con o sin .iso)
+# Nombre de la ISO 
 ISO_BASENAME="debian-13.1.0-amd64-netinst"
-# Directorio de Descargas (intenta en español y luego en inglés)
+
 DL_DIR="$HOME/Descargas"
 [ -d "$DL_DIR" ] || DL_DIR="$HOME/Downloads"
 
-# Usuario y configuración regional
 FULLNAME="Esteban Alvarado"
 USERNAME="esteban"
 LOCALE="es_CL.UTF-8"
 KEYMAP="latam"
 TIMEZONE="America/Santiago"
 
-# Hostname y dominio (ajústalo si quieres)
 HOSTNAME="debian"
 DOMAIN="local"
 
-# Disco donde se instalará (¡se BORRA!)
 TARGET_DISK="/dev/sda"
 
 # Paquetes a instalar
-INSTALL_MARIADB=true  # cámbialo a true si quieres MariaDB
+INSTALL_MARIADB=true 
 EXTRA_PACKAGES="sudo openssh-server xserver-xorg-video-all"
-DESKTOP_TASK="xfce-desktop"  # puedes cambiar a gnome-desktop, kde-desktop, etc.
+DESKTOP_TASK="gnome-desktop"
 
-# Timeout de arranque del menú (0 para GRUB instantáneo, 0.1 seg para ISOLINUX)
 BOOT_TIMEOUT_SECS=0
-
-# === Fin de configuración editable ===
+#Fin de configuración editable
 
 # Resolver nombre exacto del archivo ISO
 ISO_FILE="$DL_DIR/$ISO_BASENAME"
@@ -55,14 +49,13 @@ mkdir -p "$EXTRACT"
 echo "[+] Extrayendo contenido de la ISO (sin montar)..."
 xorriso -osirrox on -indev "$ISO_FILE" -extract / "$EXTRACT"
 
-# Asegurar que tengamos isohybrid MBR si hace falta
 if [[ ! -f "$EXTRACT/isolinux/isohdpfx.bin" ]]; then
   if [[ -f "/usr/lib/ISOLINUX/isohdpfx.bin" ]]; then
     sudo cp /usr/lib/ISOLINUX/isohdpfx.bin "$EXTRACT/isolinux/isohdpfx.bin"
   fi
 fi
 
-# Pedir contraseña para el usuario y crear hash SHA-512 (compatible d-i)
+# Pedir contraseña para el usuario
 echo
 read -r -s -p "Contraseña para el usuario '$USERNAME': " USERPASS
 echo
@@ -143,7 +136,6 @@ d-i grub-installer/force_install boolean true
 d-i grub-installer/bootdev string /dev/sda 
 # d-i grub-installer/with_grub boolean true
 
-### Finalización
 d-i finish-install/reboot_in_progress note
 
 ### Post-configuración (late_command)
